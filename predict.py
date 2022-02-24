@@ -86,7 +86,8 @@ def run_model(cv2_image):
     prediction = model.predict(data)
     classes = np.argmax(prediction, axis=1)
     return str(classes[0])
- 
+
+
 @app.route('/')
 def health_check():
     return make_response('healthy', 200)
@@ -103,8 +104,11 @@ def process_audio_file():
     loudness = get_loudness(audios, framerate)
     loudness_image = make_image(loudness)
 
-    wav, sr = librosa.load('test.wav')
-    melspec = make_mel_spectogram(wav, sr)
+    samples = audio.get_array_of_samples()
+    arr = np.array(samples).astype(np.float32)/32768 # 16 bit
+    arr = librosa.core.resample(arr, audio.frame_rate, 22050, res_type='kaiser_best')
+
+    melspec = make_mel_spectogram(arr, sr=22050)
     
     loudness_image = loudness_image.resize((280, 280))
     melspec = melspec.resize((280, 280))
@@ -134,9 +138,12 @@ if __name__ == '__main__':
     # loudness = get_loudness(result, rate)
     # loudness_image = make_image(loudness)
 
-    # wav, sr = librosa.load('test.wav')
-    # melspec = make_mel_spectogram(wav, sr)
-    
+    # samples = audio.get_array_of_samples()
+    # arr = np.array(samples).astype(np.float32)/32768 # 16 bit
+    # arr = librosa.core.resample(arr, audio.frame_rate, 22050, res_type='kaiser_best')
+
+    # melspec = make_mel_spectogram(arr, sr=22050)
+
     # loudness_image = loudness_image.resize((280, 280))
     # melspec = melspec.resize((280, 280))
 
